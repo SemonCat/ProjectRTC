@@ -4,23 +4,32 @@ module.exports = function(io, streams) {
     console.log('-- ' + client.id + ' joined --');
     client.emit('id', client.id);
 
-    client.on('message', function (details) {
+    client.on('message', function(details) {
       var otherClient = io.sockets.connected[details.to];
 
       if (!otherClient) {
         return;
       }
-        delete details.to;
-        details.from = client.id;
-        otherClient.emit('message', details);
+      delete details.to;
+      details.from = client.id;
+      otherClient.emit('message', details);
     });
-      
+
+    client.on('userCalling', function(details) {
+      var otherClient = io.sockets.connected[details.to];
+
+      if (!otherClient) {
+        return;
+      }
+      otherClient.emit('userCalling', client.id);
+    });
+
     client.on('readyToStream', function(options) {
       console.log('-- ' + client.id + ' is ready to stream --');
-      
-      streams.addStream(client.id, options.name); 
+
+      streams.addStream(client.id, options.name);
     });
-    
+
     client.on('update', function(options) {
       streams.update(client.id, options.name);
     });
